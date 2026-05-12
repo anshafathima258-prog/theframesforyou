@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Frames For You</title>
+    
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- Scripts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        /* CSS Variables for Theme */
+        :root {
+            --primary-sage: #5F7161;
+            --primary-sage-dark: #4a594d;
+            --bg-sand: #F4F1EA;
+            --bg-card: #FFFFFF;
+            --accent-gold: #C69749;
+            --text-main: #2D2D2D;
+            --text-muted: #666666;
+        }
+
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            overflow-x: hidden; 
+            scroll-behavior: smooth; 
+        }
+        
+        .bg-theme { background-color: var(--bg-sand); }
+        .text-theme { color: var(--text-main); }
+        
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--primary-sage);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-sage-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(95, 113, 97, 0.3);
+        }
+
+        .btn-gold {
+            background-color: var(--accent-gold);
+            color: white;
+        }
+        .btn-gold:hover {
+            background-color: #b0843d;
+        }
+
+        .text-gold { color: var(--accent-gold); }
+
+        /* Sidebar */
+        .sidebar-link {
+            color: var(--text-muted);
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link:hover {
+            background-color: #e8e6e1;
+            color: var(--primary-sage);
+            padding-left: 1.5rem;
+        }
+        .sidebar-link.active {
+            background-color: var(--primary-sage);
+            color: white;
+            border-left-color: var(--accent-gold);
+            box-shadow: 0 4px 6px rgba(95, 113, 97, 0.2);
+        }
+
+        /* Hero Background */
+        .hero-bg {
+            background: linear-gradient(rgba(47, 47, 47, 0.6), rgba(47, 47, 47, 0.6)), 
+                        url('https://images.unsplash.com/photo-1513519245088-4f2a9c7d3c3c?ixlib=rb-4.0.3&auto=format&fit=crop&q=80');
+            background-size: cover;
+            background-position: center;
+            padding-top: 80px; 
+            padding-bottom: 80px;
+        }
+
+        /* Animations */
+        #welcome-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-sand);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            will-change: opacity;
+        }
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--primary-sage);
+            box-shadow: 0 0 40px rgba(95, 113, 97, 0.4);
+            will-change: transform, opacity;
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Product Detail Overlay */
+        #product-detail-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6); 
+            z-index: 60;
+            display: flex;
+            justify-content: center;
+            align-items: center; 
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 10px; 
+        }
+        #product-detail-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #product-detail-card {
+            background: white;
+            width: 100%;
+            max-width: 1000px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 2rem;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        #product-detail-overlay.active #product-detail-card {
+            transform: translateY(0);
+        }
+
+        /* Customization Modal */
+        #custom-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 70;
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+        }
+        #custom-modal.active {
+            display: flex;
+        }
+        #custom-modal-content {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Scrollbar */
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Review Card Hover */
+        .review-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .review-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        /* Animation for new review */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .new-review-anim {
+            animation: slideIn 0.6s ease-out forwards;
+            border: 2px solid var(--accent-gold);
+        }
+    </style>
+</head>
+<body class="bg-theme text-theme">
+
+    <!-- Welcome Animation -->
+    <div id="welcome-overlay">
+        <div id="circle1" class="circle w-24 h-24" style="left: -100px; top: 30%;"></div>
+        <div id="circle2" class="circle w-28 h-28" style="right: -100px; top: 50%;"></div>
+        <div id="circle3" class="circle w-20 h-20" style="left: 40%; top: -100px;"></div>
+        <div id="circle4" class="circle w-32 h-32" style="right: 30%; bottom: -100px;"></div>
+        <div class="text-center z-10 px-6">
+            <h1 class="text-5xl md:text-7xl font-bold text-gold tracking-wider" style="font-family: serif;">The Frames For You</h1>
+            <p class="text-lg md:text-xl text-[#5F7161] mt-3 font-medium">Personalized Memories from Kerala</p>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="bg-white/95 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 md:px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl md:text-3xl font-bold truncate" style="color: var(--primary-sage);">The Frames For You</h1>
+            
+            <button onclick="toggleCart()" class="flex items-center gap-3 bg-[#2D2D2D] text-white px-4 md:px-5 py-2.5 md:py-3 rounded-xl hover:bg-black transition shadow-lg">
+                <i class="fas fa-shopping-bag md:text-lg"></i>
+                <span class="text-sm font-medium">Cart</span>
+                <span id="cart-count" class="bg-[#C69749] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Landing Page -->
+    <div id="landing-page">
+        <div class="hero-bg min-h-[70vh] md:h-[85vh] flex items-center text-white">
+            <div class="max-w-5xl mx-auto text-center px-4 md:px-6">
+                <h1 class="text-4xl md:text-7xl font-bold mb-6 tracking-wide">The Frames For You</h1>
+                <p class="text-lg md:text-3xl mb-10 font-light text-gray-200">Turning your precious moments into timeless art</p>
+                <button onclick="enterShopMode()"
+                        class="btn-gold text-base md:text-xl px-8 md:px-12 py-4 md:py-5 rounded-full font-semibold hover:scale-105 transition shadow-xl w-full md:w-auto">
+                    Explore Collection ↓
+                </button>
+            </div>
+        </div>
+
+        <!-- Top Selling -->
+        <div class="max-w-7xl mx-auto px-4 md:px-6 py-16 md:py-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-10 md:mb-12" style="color: var(--primary-sage);">Our Top Selling Products</h2>
+            <div id="top-selling-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- What We Do -->
+        <div class="max-w-6xl mx-auto px-4 md:px-6 py-16 md:py-24">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4" style="color: var(--primary-sage);">What We Do</h2>
+            <p class="text-center text-gray-500 text-base md:text-lg max-w-2xl mx-auto mb-10 md:mb-16">We craft beautiful custom photo frames, leatherette wallets, and instant polaroids from Kerala.</p>
+            
+            <div class="grid md:grid-cols-3 gap-6 md:gap-12">
+                <div class="text-center bg-white p-6 md:p-8 rounded-3xl shadow-sm hover:shadow-lg transition">
+                    <div class="w-14 h-14 md:w-16 md:h-16 mx-auto bg-[#E8E6E1] rounded-full flex items-center justify-center text-2xl md:text-3xl mb-4 md:mb-6 text-[#5F7161]">🖼️</div>
+                    <h3 class="text-xl md:text-2xl font-bold mb-3">Custom Framing</h3>
+                    <p class="text-gray-500 text-sm md:text-base">Premium wooden frames personalized with your photos and quotes.</p>
+                </div>
+                <div class="text-center bg-white p-6 md:p-8 rounded-3xl shadow-sm hover:shadow-lg transition">
+                    <div class="w-14 h-14 md:w-16 md:h-16 mx-auto bg-[#E8E6E1] rounded-full flex items-center justify-center text-2xl md:text-3xl mb-4 md:mb-6 text-[#5F7161]">✍️</div>
+                    <h3 class="text-xl md:text-2xl font-bold mb-3">Personalization</h3>
+                    <p class="text-gray-500 text-sm md:text-base">Laser engraving for names, dates, maps, and special messages.</p>
+                </div>
+                <div class="text-center bg-white p-6 md:p-8 rounded-3xl shadow-sm hover:shadow-lg transition">
+                    <div class="w-14 h-14 md:w-16 md:h-16 mx-auto bg-[#E8E6E1] rounded-full flex items-center justify-center text-2xl md:text-3xl mb-4 md:mb-6 text-[#5F7161]">🎁</div>
+                    <h3 class="text-xl md:text-2xl font-bold mb-3">Gift Hampers</h3>
+                    <p class="text-gray-500 text-sm md:text-base">Curated combos for birthdays, weddings, and anniversaries.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- REVIEWS SECTION -->
+        <div id="reviews-section" class="max-w-6xl mx-auto px-4 md:px-6 py-16 md:py-24 bg-white rounded-[3rem] my-12 shadow-sm border border-gray-50">
+            <div class="text-center mb-16">
+                <span class="text-[#C69749] font-bold tracking-widest uppercase text-sm">Testimonials</span>
+                <h2 class="text-3xl md:text-5xl font-bold text-[#2D2D2D] mt-3">Loved by Malayalees</h2>
+                <p class="text-gray-500 mt-4">Real words from our happy customers across God's Own Country.</p>
+            </div>
+
+            <div id="reviews-container" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Review 1 -->
+                <div class="review-card bg-[#F9F9F9] p-8 rounded-3xl relative">
+                    <div class="text-[#C69749] text-4xl opacity-20 absolute top-4 left-6">❝</div>
+                    <div class="flex text-yellow-400 text-sm mb-4">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                    <p class="text-gray-600 italic mb-6 relative z-10 leading-relaxed">
+                        "Ordered a custom wallet for my husband from Kochi. The quality of the leatherette is top-notch and name engraving was perfect. Received it in just 2 days!"
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-[#5F7161] text-white flex items-center justify-center font-bold text-lg">A</div>
+                        <div>
+                            <h4 class="font-bold text-[#2D2D2D] text-lg">Arun Kumar</h4>
+                            <p class="text-xs text-gray-500 font-medium">Edappally, Kochi</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Review 2 -->
+                <div class="review-card bg-[#F9F9F9] p-8 rounded-3xl relative">
+                    <div class="text-[#C69749] text-4xl opacity-20 absolute top-4 left-6">❝</div>
+                    <div class="flex text-yellow-400 text-sm mb-4">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                    <p class="text-gray-600 italic mb-6 relative z-10 leading-relaxed">
+                        "The A4 frame I bought looks so elegant on my living room wall. Packaging was very secure, nothing was damaged. Highly recommended for gifting!"
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-[#C69749] text-white flex items-center justify-center font-bold text-lg">L</div>
+                        <div>
+                            <h4 class="font-bold text-[#2D2D2D] text-lg">Lakshmi Menon</h4>
+                            <p class="text-xs text-gray-500 font-medium">Trivandrum</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Review 3 -->
+                <div class="review-card bg-[#F9F9F9] p-8 rounded-3xl relative">
+                    <div class="text-[#C69749] text-4xl opacity-20 absolute top-4 left-6">❝</div>
+                    <div class="flex text-yellow-400 text-sm mb-4">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <p class="text-gray-600 italic mb-6 relative z-10 leading-relaxed">
+                        "Superb polaroid print quality! Much better than local studios in Kozhikode. I ordered 100 prints for my sister's wedding, and everyone loved them."
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-[#2D2D2D] text-white flex items-center justify-center font-bold text-lg">F</div>
+                        <div>
+                            <h4 class="font-bold text-[#2D2D2D] text-lg">Fathima S.</h4>
+                            <p class="text-xs text-gray-500 font-medium">Calicut</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WRITE A REVIEW FORM -->
+        <div class="max-w-3xl mx-auto px-4 md:px-6 pb-24">
+            <div class="bg-white p-8 md:p-12 rounded-3xl shadow-xl border-2 border-dashed border-[#C69749]">
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl md:text-3xl font-bold text-[#2D2D2D]">Write a Review</h2>
+                    <p class="text-gray-500 mt-2 text-sm">Your review will appear instantly on website.</p>
+                </div>
+
+                <form id="customer-review-form" onsubmit="handleCustomerReview(event)" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-[#5F7161] mb-2">Your Name</label>
+                            <input type="text" id="customer-name" required placeholder="e.g. Rahul" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#C69749] focus:ring-2 focus:ring-[#C69749]/20 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-[#5F7161] mb-2">City</label>
+                            <input type="text" id="customer-city" required placeholder="e.g. Alappuzha" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#C69749] focus:ring-2 focus:ring-[#C69749]/20 outline-none transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-[#5F7161] mb-2">Rating</label>
+                        <div class="flex gap-2" id="star-rating-container">
+                            <button type="button" onclick="setRating(1)" class="text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none"><i class="fas fa-star" id="star-1"></i></button>
+                            <button type="button" onclick="setRating(2)" class="text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none"><i class="fas fa-star" id="star-2"></i></button>
+                            <button type="button" onclick="setRating(3)" class="text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none"><i class="fas fa-star" id="star-3"></i></button>
+                            <button type="button" onclick="setRating(4)" class="text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none"><i class="fas fa-star" id="star-4"></i></button>
+                            <button type="button" onclick="setRating(5)" class="text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none"><i class="fas fa-star" id="star-5"></i></button>
+                        </div>
+                        <input type="hidden" id="customer-rating" value="5">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-[#5F7161] mb-2">Your Review</label>
+                        <textarea id="customer-message" rows="4" required placeholder="Share your experience..." class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#C69749] focus:ring-2 focus:ring-[#C69749]/20 outline-none transition"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-[#5F7161] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#4a594d] transition shadow-lg flex items-center justify-center gap-2">
+                        <i class="fas fa-paper-plane"></i> Submit Review
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Section -->
+    <div id="products-section" class="hidden max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-16">
+        <div class="flex flex-col lg:flex-row gap-8 md:gap-12">
+            <!-- Sidebar -->
+            <div class="w-full lg:w-72 bg-white shadow-lg p-4 md:p-6 rounded-3xl lg:sticky lg:top-24 h-fit border border-gray-100">
+                <h2 class="text-2xl font-bold mb-6 text-[#5F7161]">Categories</h2>
+                <div class="space-y-2">
+                    <a href="#" onclick="filterCategory('all', this); event.preventDefault()" class="sidebar-link active block px-4 md:px-5 py-3 md:py-4 rounded-2xl font-medium">All Products</a>
+                    <a href="#" onclick="filterCategory('wallet', this); event.preventDefault()" class="sidebar-link block px-4 md:px-5 py-3 md:py-4 rounded-2xl font-medium">🪪 Wallets</a>
+                    <a href="#" onclick="filterCategory('polaroid', this); event.preventDefault()" class="sidebar-link block px-4 md:px-5 py-3 md:py-4 rounded-2xl font-medium">📸 Polaroid Prints</a>
+                    <a href="#" onclick="filterCategory('frame', this); event.preventDefault()" class="sidebar-link block px-4 md:px-5 py-3 md:py-4 rounded-2xl font-medium">🖼️ Frames</a>
+                    <a href="#" onclick="filterCategory('combo', this); event.preventDefault()" class="sidebar-link block px-4 md:px-5 py-3 md:py-4 rounded-2xl font-medium">🔥 Combos</a>
+                    <a href="#" id="link-boquet" onclick="filterCategory('boquet', this); event.preventDefault()" class="sidebar-link block px-4 md:px-5 py-3 md:py-4 rounded-2xl font-medium">💐 Bouquets</a>
+                    <a href="#" id="link-hamper" onclick="filterCategory('hamper', this); event.preventDefault()" class="sidebar-link block px-4 md:px-5 py-3 md:py-4 rounded-2xl font-medium">🎀 Hampers</a>
+                    <a href="#" onclick="filterCategory('accessory', this); event.preventDefault()" class="sidebar-link block px-4 md:px-5 py-3 md:py-4 rounded-2xl font-medium">✍️ Accessories</a>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="flex-1">
+                <h2 class="text-3xl md:text-4xl font-bold mb-8 md:mb-10 text-[#2D2D2D]">Our Collection</h2>
+                <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"></div>
+                
+                <div class="text-center mt-16 md:mt-20">
+                    <button onclick="backToHome()" class="bg-gray-200 text-gray-700 px-8 md:px-10 py-3 md:py-4 rounded-full hover:bg-gray-300 transition font-semibold text-sm md:text-base">
+                        ← Back to Home
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Detail Overlay -->
+    <div id="product-detail-overlay">
+        <div id="product-detail-card" class="flex flex-col md:flex-row overflow-hidden">
+            <button onclick="closeProductDetail()" class="absolute top-4 right-4 z-20 bg-white/90 p-2 rounded-full hover:bg-gray-100 shadow-md md:hidden">
+                <i class="fas fa-times text-gray-600 text-lg"></i>
+            </button>
+
+            <!-- Left: Image -->
+            <div class="w-full md:w-1/2 bg-gray-50 flex items-center justify-center p-6 md:p-8 h-64 md:h-auto relative">
+                <img id="detail-image" src="" alt="Product" class="max-h-full max-w-full object-contain rounded-xl shadow-lg">
+            </div>
+
+            <!-- Right: Details -->
+            <div class="w-full md:w-1/2 p-6 md:p-12 flex flex-col justify-center relative">
+                <button onclick="closeProductDetail()" class="absolute top-6 right-6 text-3xl text-gray-400 hover:text-red-500 hidden md:block transition">&times;</button>
+                
+                <div class="mb-4">
+                    <span class="bg-[#C69749] text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm uppercase tracking-wide">Special Offer</span>
+                </div>
+                
+                <h2 id="detail-name" class="text-2xl md:text-4xl font-bold text-[#2D2D2D] mb-2"></h2>
+                
+                <div class="flex items-center gap-2 text-xs md:text-sm text-yellow-500 mb-4">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    <span class="text-gray-500">(240 Reviews)</span>
+                </div>
+
+                <p id="detail-desc" class="text-gray-600 text-sm md:text-lg mb-6 leading-relaxed"></p>
+                
+                <div class="flex items-baseline gap-4 mb-6 md:mb-8">
+                    <span id="detail-price" class="text-3xl md:text-4xl font-bold text-[#5F7161]"></span>
+                    <!-- CHANGED: Removed line-through, changed to text-gold (Gold) instead of grey/muted -->
+                    <span id="detail-offer" class="text-gold font-medium text-base md:text-lg"></span>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-4">
+                    <button onclick="closeProductDetail()" class="flex-1 border-2 border-[#5F7161] text-[#5F7161] font-bold py-3 md:py-4 rounded-xl hover:bg-gray-50 transition text-sm md:text-base">
+                        Continue Shopping
+                    </button>
+                    <button onclick="buyNow()" class="flex-1 btn-primary text-white font-bold py-3 md:py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 text-sm md:text-base">
+                        Buy Now <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customization Modal (For Bouquets/Hampers) -->
+    <div id="custom-modal">
+        <div id="custom-modal-content" class="relative">
+            <h3 class="text-2xl font-bold mb-4 text-[#2D2D2D]" id="custom-modal-title">Customize Your Item</h3>
+            <p class="text-gray-500 text-sm mb-4">Please tell us what you want so we can prepare it perfectly.</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-[#5F7161] mb-2">Your Preferences</label>
+                    <textarea id="custom-text" rows="3" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#C69749] focus:ring-2 focus:ring-[#C69749]/20 outline-none" placeholder="e.g. Red Roses, 20 stems..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-[#5F7161] mb-2">Confirm Total Price (₹)</label>
+                    <input type="number" id="custom-price" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#C69749] focus:ring-2 focus:ring-[#C69749]/20 outline-none" placeholder="e.g. 500">
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeCustomModal()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-300 transition">Cancel</button>
+                <button onclick="confirmCustom()" class="flex-1 btn-primary text-white font-bold py-3 rounded-xl shadow-lg">Confirm & Add</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full md:w-[400px] bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50 overflow-y-auto scrollbar-hide">
+        <div class="p-4 md:p-6 border-b border-gray-100 flex justify-between items-center bg-[#F9F9F9]">
+            <h2 class="text-xl md:text-2xl font-bold text-[#2D2D2D]">Your Cart</h2>
+            <button onclick="toggleCart()" class="text-3xl text-gray-500 hover:text-red-500 transition">&times;</button>
+        </div>
+        
+        <div id="cart-items" class="p-4 md:p-6 space-y-6 min-h-[300px]"></div>
+        
+        <div class="p-4 md:p-6 border-t border-gray-100 bg-[#F9F9F9] mt-auto sticky bottom-0">
+            <div class="flex justify-between text-xl md:text-2xl font-bold mb-6 text-[#2D2D2D]">
+                <span>Total</span>
+                <span id="cart-total" class="text-[#5F7161]">₹0</span>
+            </div>
+            
+            <button onclick="checkoutWhatsApp()" class="w-full bg-[#25D366] text-white py-3 md:py-4 rounded-2xl text-base md:text-lg font-bold tracking-wide hover:bg-[#128C7E] transition shadow-lg flex items-center justify-center gap-2">
+                <i class="fab fa-whatsapp text-xl"></i> Checkout via WhatsApp
+            </button>
+            <p class="text-center text-xs text-gray-500 mt-3">Order will be sent to 9074063466</p>
+        </div>
+    </div>
+
+    <script>
+        let cart = [];
+        
+        // --- PRODUCTS LIST ---
+        const products = [
+            // BOUQUET (Customizable)
+            { id:100, name:"Custom Flower Bouquet", price:350, category:"boquet", offer:"Starts at ₹350", description: "Create your own bouquet with your choice of flowers and quantity.", topSelling: false, image: "https://i.postimg.cc/wj9cwqBV/IMG-20260511-WA0006.jpg" },
+            
+            // WALLETS
+            { id:1, name:"Name Wallet", price:350, category:"wallet", offer:"Custom Name Design", description: "A premium leatherette wallet personalized with your name.", topSelling: true, image: "https://i.postimg.cc/yYBpFd6W/IMG-20260512-WA0035.jpg" },
+            { id:2, name:"Sketch Wallet", price:450, category:"wallet", offer:"Custom Sketch Design", description: "laser printed on high-quality leatherette.", topSelling: true, image: "https://i.postimg.cc/W4WD6jDq/IMG-20260512-WA0037.jpg" },
+            
+            // POLAROIDS
+            { id:3, name:"Mini Polaroids (30 pics)", price:90, category:"polaroid", offer:"30 Pictures", description: "High-quality credit card sized prints.", topSelling: true, image: "https://i.postimg.cc/3Jd4fjxN/IMG-20260511-WA0016.jpg" },
+            { id:4, name:"Standard Polaroids (35 pics)", price:100, category:"polaroid", offer:"35 Pictures", description: "Our best-selling polaroid pack.", topSelling: false, image: "https://i.postimg.cc/6q7Wc0f3/IMG-20260512-WA0034.jpg" },
+            
+            // FRAMES
+            { id:5, name:"A4 Frame", price:300, category:"frame", offer:"+ 10 Mini Polaroids FREE", description: "Premium MDF frame with glass front.", topSelling: false, image: "https://i.postimg.cc/gcwLNqJq/IMG-20260512-WA0036.jpg" },
+            { id:6, name:"A5 Frame", price:250, category:"frame", offer:"+ 10 Mini Polaroids FREE", description: "Mid-sized table top frame.", topSelling: false, image: "https://i.postimg.cc/yYbf2Thr/IMG-20260512-WA0039.jpg" },
+            { id:7, name:"Mini Frame", price:100, category:"frame", offer:"+ 5 Polaroids FREE", description: "Small but mighty.", topSelling: false, image: "https://i.postimg.cc/t4G61Z9x/IMG-20260512-WA0044.jpg" },
+            { id:8, name:"A3 Frame", price:500, category:"frame", offer:"+ 15 Polaroids FREE", description: "Large statement piece.", topSelling: false, image: "https://i.postimg.cc/tCgNzV6h/IMG-20260511-WA0002.jpg" },
+            { id:9, name:"Magic Mirror", price:500, category:"frame", offer:"+ 10 Polaroids FREE", description: "A magical gift!", topSelling: false, image: "https://i.postimg.cc/CMz36dk7/IMG-20260511-WA0046.jpg" },
+            
+            // COMBOS
+            { id:10, name:"A4 + A5 Frame Combo", price:450, category:"combo", offer:"+ 10 Polaroids", description: "The perfect duo.", topSelling: false, image: "https://i.postimg.cc/gcwLNqJq/IMG-20260512-WA0036.jpg" },
+            { id:11, name:"A4+A5+Mini Frame", price:500, category:"combo", offer:"complete set", description: "The ultimate gift hamper.", topSelling: false, image: "https://images.unsplash.com/photo-1528503758671-63c8ef5a0278?ixlib=rb-4.0.3&auto=format&fit=crop&q=80&w=800" },
+            
+            // HAMPERS (Customizable)
+            { id:101, name:"shirt Hamper", price:00, category:"hamper", offer:"Starts at ₹1200", description: "Build your own gift hamper with frames, wallets, and decor.", topSelling: false, image: "https://i.postimg.cc/HLwzp6Lt/IMG-20260511-WA0029.jpg" },
+
+            // ACCESSORIES
+            { id:12, name:"Custom Name Slips", price:99, category:"accessory", offer:"Pack of 30 Pieces", description: "Custom name tags.", topSelling: false, image: "https://images.unsplash.com/photo-1456735190827-d1262f71b8a3?ixlib=rb-4.0.3&auto=format&fit=crop&q=80&w=800" }
+        ];
+
+        // --- ANIMATION LOGIC ---
+        function startWelcomeAnimation() {
+            const overlay = document.getElementById('welcome-overlay');
+            const circles = document.querySelectorAll('.circle');
+            setTimeout(() => {
+                circles.forEach((c, i) => {
+                    c.style.transition = 'all 1.5s cubic-bezier(0.25, 1, 0.5, 1)';
+                    c.style.left = '50%';
+                    c.style.top = '50%';
+                    c.style.transform = `translate(-50%, -50%) scale(${1.2 + i*0.2})`;
+                });
+            }, 100);
+            setTimeout(() => {
+                circles.forEach(c => {
+                    c.style.transition = 'all 1s ease-in';
+                    c.style.transform = 'translate(-50%, -50%) scale(15)';
+                    c.style.opacity = '1';
+                });
+            }, 1500);
+            setTimeout(() => {
+                overlay.style.transition = 'opacity 0.8s ease';
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.style.display = 'none', 800);
+            }, 2300);
+        }
+
+        // --- NAVIGATION & RENDER ---
+        function enterShopMode() {
+            document.getElementById('landing-page').classList.add('hidden');
+            document.getElementById('products-section').classList.remove('hidden');
+            renderProducts(products);
+            window.scrollTo(0, 0);
+        }
+        function backToHome() {
+            document.getElementById('landing-page').classList.remove('hidden');
+            document.getElementById('products-section').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderTopSelling() {
+            const container = document.getElementById('top-selling-grid');
+            const sellingProducts = products.filter(p => p.topSelling).slice(0, 3);
+            container.innerHTML = '';
+            sellingProducts.forEach(product => {
+                const card = `
+                    <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition duration-300 overflow-hidden border border-gray-100 group cursor-pointer" onclick="openProductDetail(${product.id})">
+                        <div class="h-48 overflow-hidden">
+                            <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-bold text-lg text-[#2D2D2D]">${product.name}</h3>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="text-xl font-bold text-[#5F7161]">₹${product.price}</span>
+                                <button class="text-xs bg-[#5F7161] text-white px-3 py-1 rounded-full">View</button>
+                            </div>
+                        </div>
+                    </div>`;
+                container.innerHTML += card;
+            });
+        }
+
+        function renderProducts(filtered) {
+            const container = document.getElementById('products-grid');
+            container.innerHTML = '';
+            if(filtered.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 col-span-3 text-center text-xl py-10">No products found.</p>';
+                return;
+            }
+
+            filtered.forEach(product => {
+                const card = `
+                    <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 product-card flex flex-col h-full border border-gray-100 cursor-pointer" onclick="openProductDetail(${product.id})">
+                        <div class="h-56 overflow-hidden relative">
+                            <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover product-img">
+                            ${product.offer ? `<span class="absolute top-3 right-3 bg-[#C69749] text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">OFFER</span>` : ''}
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col">
+                            <h3 class="font-bold text-lg md:text-xl text-[#2D2D2D] mb-1">${product.name}</h3>
+                            <p class="text-[#5F7161] text-sm mb-4 font-medium">${product.offer}</p>
+                            <div class="mt-auto flex items-center justify-between">
+                                <p class="text-xl md:text-2xl font-bold text-[#5F7161]">₹${product.price}</p>
+                                <button onclick="event.stopPropagation(); addToCart(${product.id})" class="btn-primary text-white px-4 md:px-6 py-2 md:py-2.5 rounded-xl font-medium flex items-center gap-2 text-sm">
+                                    <i class="fas fa-plus text-sm"></i> Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+                container.innerHTML += card;
+            });
+        }
+
+        function filterCategory(cat, element) {
+            document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
+            if(element) element.classList.add('active');
+            document.getElementById('products-section').classList.remove('hidden');
+            document.getElementById('landing-page').classList.add('hidden');
+            if (cat === 'all') renderProducts(products);
+            else renderProducts(products.filter(p => p.category === cat));
+            window.scrollTo(0, 0);
+        }
+
+        // --- PRODUCT DETAIL & CUSTOM MODAL LOGIC ---
+        let currentDetailId = null;
+        
+        function openProductDetail(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+            currentDetailId = id;
+            
+            document.getElementById('detail-image').src = product.image;
+            document.getElementById('detail-name').innerText = product.name;
+            document.getElementById('detail-price').innerText = `₹${product.price}`;
+            document.getElementById('detail-desc').innerText = product.description || "A beautiful product.";
+            
+            // CHANGED: Removed line-through class, applied text-gold class
+            const offerEl = document.getElementById('detail-offer');
+            offerEl.innerText = product.offer;
+            offerEl.classList.remove('line-through', 'text-gray-500');
+            offerEl.classList.add('text-gold');
+
+            document.getElementById('product-detail-overlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeProductDetail() {
+            document.getElementById('product-detail-overlay').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        function buyNow() {
+            if(!currentDetailId) return;
+            const product = products.find(p => p.id === currentDetailId);
+            
+            // Check if product is customizable (Hamper or Bouquet)
+            if(product.category === 'hamper' || product.category === 'boquet') {
+                openCustomModal();
+            } else {
+                addToCart(currentDetailId);
+                closeProductDetail();
+                toggleCart();
+            }
+        }
+
+        // --- CUSTOM MODAL FUNCTIONS ---
+        function openCustomModal() {
+            const product = products.find(p => p.id === currentDetailId);
+            const modal = document.getElementById('custom-modal');
+            const title = document.getElementById('custom-modal-title');
+            const priceInput = document.getElementById('custom-price');
+            
+            title.innerText = `Customize ${product.name}`;
+            priceInput.value = product.price; // Default price
+            
+            modal.classList.add('active');
+        }
+
+        function closeCustomModal() {
+            document.getElementById('custom-modal').classList.remove('active');
+        }
+
+        function confirmCustom() {
+            const product = products.find(p => p.id === currentDetailId);
+            const preferences = document.getElementById('custom-text').value;
+            const finalPrice = document.getElementById('custom-price').value;
+
+            if(!preferences || !finalPrice) {
+                alert("Please fill in your preferences and confirm the price.");
+                return;
+            }
+
+            // Create a customized object for the cart
+            const customItem = { ...product }; // Copy base product
+            customItem.name = `${product.name} (Custom)`;
+            customItem.price = parseInt(finalPrice);
+            customItem.offer = `Req: ${preferences}`;
+
+            cart.push(customItem);
+            updateCart();
+            
+            closeCustomModal();
+            closeProductDetail();
+            toggleCart();
+        }
+
+        // --- CART ---
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            cart.push(product);
+            updateCart();
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-6 right-6 bg-[#2D2D2D] text-white px-6 md:px-8 py-3 md:py-4 rounded-2xl shadow-2xl z-50 flex items-center gap-3 transform translate-y-20 transition-all duration-300 text-sm md:text-base";
+            toast.innerHTML = `<i class="fas fa-check-circle text-[#5F7161]"></i> <span class="font-medium">${product.name} added!</span>`;
+            document.body.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.remove('translate-y-20'));
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-20');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+        function updateCart() {
+            document.getElementById('cart-count').textContent = cart.length;
+            let total = cart.reduce((sum, item) => sum + item.price, 0);
+            let html = '';
+            cart.forEach((item, i) => {
+                html += `
+                    <div class="flex gap-4 border-b border-gray-100 pb-4 mb-4 animate-[fadeIn_0.5s]">
+                        <img src="${item.image}" class="w-16 h-16 md:w-20 md:h-20 object-cover rounded-xl shadow-sm">
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-sm md:text-base text-[#2D2D2D]">${item.name}</h4>
+                                <button onclick="removeFromCart(${i})" class="text-gray-400 hover:text-red-500 transition"><i class="fas fa-trash"></i></button>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-2">${item.offer}</p>
+                            <p class="font-bold text-[#5F7161]">₹${item.price}</p>
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('cart-items').innerHTML = html || '<div class="text-center py-12"><div class="text-6xl mb-4 text-gray-200">🛒</div><p class="text-gray-500">Your cart is empty</p></div>';
+            document.getElementById('cart-total').textContent = `₹${total}`;
+        }
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCart();
+        }
+        function toggleCart() {
+            document.getElementById('cart-sidebar').classList.toggle('translate-x-full');
+        }
+        function checkoutWhatsApp() {
+            if (cart.length === 0) return alert("Cart is empty!");
+            const phoneNumber = "9074063466"; 
+            let message = "👋 *Hello, I would like to place an order from The Frames For You.*\n\n🧾 *My Order Details:* \n";
+            cart.forEach((item, index) => {
+                message += `${index + 1}. *${item.name}*\n   Price: ₹${item.price}\n   Note: ${item.offer}\n\n`;
+            });
+            let total = cart.reduce((sum, item) => sum + item.price, 0);
+            message += `💰 *Total Amount: ₹${total}*`;
+            message += `\n\nPlease confirm my order. Thank you! 🙏`;
+            window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+
+        // --- CUSTOMER REVIEW LOGIC ---
+        let currentRating = 5;
+        function setRating(rating) {
+            currentRating = rating;
+            document.getElementById('customer-rating').value = rating;
+            for(let i = 1; i <= 5; i++) {
+                const star = document.getElementById(`star-${i}`);
+                if(i <= rating) {
+                    star.classList.remove('text-gray-300');
+                    star.classList.add('text-yellow-400');
+                } else {
+                    star.classList.add('text-gray-300');
+                    star.classList.remove('text-yellow-400');
+                }
+            }
+        }
+        function handleCustomerReview(event) {
+            event.preventDefault();
+            const name = document.getElementById('customer-name').value;
+            const city = document.getElementById('customer-city').value;
+            const rating = parseInt(document.getElementById('customer-rating').value);
+            const message = document.getElementById('customer-message').value;
+            const firstLetter = name.charAt(0).toUpperCase();
+            
+            let starsHtml = '';
+            for(let i=0; i<5; i++) {
+                if(i < rating) starsHtml += '<i class="fas fa-star"></i>';
+                else starsHtml += '<i class="far fa-star text-gray-300"></i>';
+            }
+
+            const container = document.getElementById('reviews-container');
+            if (container.children.length > 0) {
+                const oldestReview = container.lastElementChild;
+                oldestReview.style.transition = 'opacity 0.5s ease';
+                oldestReview.style.opacity = '0';
+                setTimeout(() => { if(oldestReview.parentNode) oldestReview.remove(); }, 500);
+            }
+
+            const newReviewCard = document.createElement('div');
+            newReviewCard.className = "review-card new-review-anim bg-[#F9F9F9] p-8 rounded-3xl relative";
+            newReviewCard.innerHTML = `
+                <div class="text-[#C69749] text-4xl opacity-20 absolute top-4 left-6">❝</div>
+                <div class="flex text-yellow-400 text-sm mb-4">${starsHtml}</div>
+                <p class="text-gray-600 italic mb-6 relative z-10 leading-relaxed">"${message}"</p>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-[#2D2D2D] text-white flex items-center justify-center font-bold text-lg">${firstLetter}</div>
+                    <div>
+                        <h4 class="font-bold text-[#2D2D2D] text-lg">${name}</h4>
+                        <p class="text-xs text-gray-500 font-medium">${city}</p>
+                    </div>
+                </div>
+            `;
+            container.insertBefore(newReviewCard, container.firstChild);
+            document.getElementById('customer-review-form').reset();
+            setRating(5);
+            document.getElementById('reviews-section').scrollIntoView({ behavior: 'smooth' });
+            
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-[#5F7161] text-white px-6 py-3 rounded-full shadow-xl z-50 text-sm font-bold animate-[slideIn_0.5s]";
+            toast.innerText = "✅ Review Submitted! Oldest review removed.";
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            startWelcomeAnimation();
+            renderProducts(products);
+            renderTopSelling();
+            setRating(5);
+        };
+    </script>
+</body>
+</html>
